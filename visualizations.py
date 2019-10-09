@@ -1,112 +1,104 @@
-"""
-This module is for your final visualization code.
-One visualization per hypothesis question is required.
-A framework for each type of visualization is provided.
-"""
-
 import seaborn as sns
 import matplotlib.pyplot as plt
-%matplotlib inline
-
-# Set specific parameters for the visualizations
-large = 22; med = 16; small = 12
-params = {'axes.titlesize': large,
-          'legend.fontsize': med,
-          'figure.figsize': (16, 10),
-          'axes.labelsize': med,
-          'xtick.labelsize': med,
-          'ytick.labelsize': med,
-          'figure.titlesize': large}
-plt.rcParams.update(params)
-plt.style.use('seaborn-whitegrid')
-sns.set_style("white")
 
 
-def overlapping_density(package=None, input_vars=None, target_vars=None):
+def desc_stats(df):
     """
-    Set the characteristics of your overlapping density plot
-    All arguments are set to None purely as a filler right now
+    Creates a table of descriptive statistics for numerical variables of DataFrame.
+    
+    Parameters
+    ----------
+    df: DataFrame name
+        Specify columns with df[[columns]].
+    
+    Returns
+    -------
+    Outputs a table of summary statistics
+    
+    """    
+   # If you want specific columns, specify with df[[columns]]
+    return df.describe()
 
-    Function takes package name, input variables(categories), and target variable as input.
-    Returns a figure
 
-    Should be able to call this function in later visualization code.
-
-    PARAMETERS
-
-    :param package:        should only take sns or matplotlib as inputs, any other value should throw and error
-    :param input_vars:     should take the x variables/categories you want to plot
-    :param target_vars:    the y variable of your plot, what you are comparing
-    :return:               fig to be enhanced in subsequent visualization functions
+def make_box_plot(data1, data2, image_name):
     """
+    Creates two boxplots in one figure space and save as a png file
+    
+    Parameters
+    ----------
+    data1: DataFrame for the first boxplot
+        Specify columns by data1[[column names]]
+    data2: DataFrame for the second boxplot
+        Specify columns by data2[[column names]]
+    image_name: Desired filename for the saved image
+    
+    Returns
+    -------
+    Outputs a saved png file and returns a box plot
 
-    # Set size of figure
-    fig = plt.figure(figsize=(16, 10), dpi=80)
-
-    # Starter code for figuring out which package to use
-    if package == "sns":
-        for variable in input_vars:
-            sns.kdeplot(...)
-    elif package == 'matplotlib':
-        for variable in input_vars:
-            plt.plot(..., label=None, linewidth=None, color=None, figure = fig)
-
-    return fig
-
-
-
-def boxplot_plot(package=None, input_vars=None, target_vars=None):
     """
-    Same specifications and requirements as overlapping density plot
-
-    Function takes package name, input variables(categories), and target variable as input.
-    Returns a figure
-
-    PARAMETERS
-
-    :param package:        should only take sns or matplotlib as inputs, any other value should throw and error
-    :param input_vars:     should take the x variables/categories you want to plot
-    :param target_vars:    the y variable of your plot, what you are comparing
-    :return:               fig to be enhanced in subsequent visualization functions
-    """
-    plt.figure(figsize=(16, 10), dpi=80)
-
-    pass
-
-
-def visualization_one(target_var = None, input_vars= None, output_image_name=None):
-    """
-    The visualization functions are what is used to create each individual image.
-    The function should be repeatable if not generalizable
-    The function will call either the boxplot or density plot functions you wrote above
-
-    :param target_var:
-    :param input_vars:
-    :param output_image_name: the desired name for the image saved
-    :return: outputs a saved png file and returns a fig object for testing
-    """
-    ###
-    # Main chunk of code here
-    ###
-
-    # Starter code for labeling the image
-    plt.xlabel(None, figure = fig)
-    plt.ylabel(None, figure = fig)
-    plt.title(None, figure= fig)
-    plt.legend()
-
+    # Create a figure space and define subplots
+    fig, axes = plt.subplots(2, 1, figsize=(7.5, 8))
+    # Set first subplot
+    box1 = sns.boxplot(data=data1,
+                       orient='h',
+                       ax=axes[0])
+    box1.set(xlabel="number of points",
+             title=f"{image_name.capitalize().replace('_', ' ')}")
+    
+    # Define second subplot
+    box2 = sns.boxplot(data=data2,
+                       orient="h",
+                       ax=axes[1],
+                       color='g')
+    box2.set_xlabel("number of points");
+    
     # exporting the image to the img folder
-    plt.savefig(f'img/{output_image_name}.png', transparent = True, figure = fig)
-    return fig
+    plt.savefig(f'img/{image_name}.png',
+                figure=fig,
+               bbox_inches="tight")
 
 
-# please fully flesh out this function to meet same specifications of visualization one
+def make_density_plot(df, col, image_name):
+    """
+    Create density plot and save as a png file
+    
+    Parameters
+    ----------
+    df: DataFrame name
+    col: Column name
+    image_name: Desired filename for the saved image
+    
+    Returns
+    -------
+    Outputs a saved png file and returns a density plot for testing
 
-def visualization_two(output_image_name):
-    pass
+    """
+    x = sns.distplot(df[col])
+    x.set_title(image_name.capitalize().replace("_"," "))
+    plt.savefig(f"img/{image_name}.png", bbox_inches="tight")
 
-def visualization_three(output_image_name):
-    pass
 
-def visualization_four(output_image_name):
-    pass
+def make_ordered_boxplot(df, groupby_col, agg_col, image_name):
+    """
+    Create a boxplot that is sorted by group averages in descending order
+    and save as a png file
+    
+    Parameters
+    ----------
+    df: DataFrame name
+    groupby_col: Column by which DataFrame is grouped
+    agg_col: Column to calculate mean
+    image_name: Desired filename for the saved image
+    
+    Returns
+    -------
+    Outputs a saved png file and returns a box plot for testing
+
+    """
+    my_order = df.groupby(groupby_col)[agg_col].mean().sort_values(ascending=False).index
+    # Create boxplot and add ordering
+    ax = sns.boxplot(x=agg_col, y=groupby_col, data=df, order=my_order)
+    # Make labels and title
+    ax.set_title(image_name.capitalize().replace("_"," "))
+    plt.savefig(f"img/{image_name}.png", bbox_inches="tight")
