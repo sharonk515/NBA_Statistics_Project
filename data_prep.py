@@ -30,30 +30,25 @@ def get_data(url, page=1, per_page=100, total_pages=None):
 
     """
     # Specify url and parameters
-    parameters = {'per_page': per_page,
-                  'page': page,
-                  'postseason': True}
+    parameters = {'per_page': per_page, 'page': page, 'postseason': True}
     # Make request with url and parameters and return results as json
     resp = requests.get(url, params=parameters).json()
     # total_pages = user-specified argument or the 'total_pages' value in the meta, whichever is less and NOT None
     # So if a user does NOT specify total_pages, function will use the 'total_pages' value in the meta data
-    total_pages = min(x for x in [resp['meta']['total_pages'], total_pages]
-                      if x is not None) - page + 1
+    total_pages = min(x for x in [resp['meta']['total_pages'], total_pages] if x is not None)-page+1
     # Initialize data frame
     initial_df = pd.DataFrame()
     # Looping through all our pages
     for page_num in range(page, total_pages+1):
         # Make request using url and parameters and return results as json
-        parameters = {'page': page_num,
-                      'per_page': per_page,
-                      'postseason': True}
+        parameters = {'page': page_num, 'per_page': per_page, 'postseason': True}
         resp = requests.get(url, params=parameters).json()
-        # Create dataframe from json key, 'data'
+        # Create dataframe from json data key
         data = pd.DataFrame.from_records(resp['data'])
         # Creating columns out of the dictionary-type columns
         # Iterating through columns
         for col in data.columns:
-            # Since each value in col is same type, we can use the type of cell data[col][0] to test type for the entire column
+            # Since each value in col is of same type, we can just use the type of cell data[col][0] to test type for the entire column
             if type(data[col][0]) == dict:
                 # For each key in our dictionary value
                 for k in data[col][0].keys():
@@ -65,7 +60,7 @@ def get_data(url, page=1, per_page=100, total_pages=None):
         final_df = pd.concat([initial_df, data])
         # Delay next request
         time.sleep(.8)
-
+    
     final_df.to_csv('data/games_data.csv', index=False)
 
     return final_df
